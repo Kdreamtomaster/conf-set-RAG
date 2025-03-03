@@ -2,17 +2,24 @@ services:
   backend:
     build: .
     ports:
-      - "8000:8000"
+      - "18001:8000"
     env_file:
       - .env
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-
+    networks:
+      - rag_network  # 사용자 정의 네트워크 반영
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
   frontend:
     build: .
     ports:
-      - "8501:8501"
+      - "18502:8501"
     depends_on:
       - backend
     env_file:
       - .env
-    command: ["streamlit", "run", "streamlit_app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    networks:
+      - rag_network  # 사용자 정의 네트워크 반영
+    command: streamlit run streamlit_app.py
+networks:
+  rag_network:  # 사용자 정의 네트워크 명시적으로 설정
+    name: rag_network
+    driver: bridge

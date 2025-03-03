@@ -1,127 +1,137 @@
-# RAG 기반 환경설정 가이드 챗봇
+# 🌍 RAG 기반 환경설정 가이드 챗봇
 
-## 📌 프로젝트 개요
-
-이 프로젝트는 **RAG 기반 환경설정 가이드 챗봇**을 구축하여, Airflow 및 리눅스 환경 설정 관련 가이드를 제공하는 챗봇 시스템입니다.
-FastAPI를 백엔드로 사용하고, FAISS를 활용한 벡터 검색 및 OpenAI의 LLM(ChatGPT API)을 사용하여 질문에 대한 답변을 생성합니다. 또한, Streamlit을 활용하여 UI에서 직접 질문을 입력하고 응답을 확인할 수 있습니다.
-
-## 🛠 기술 스택
-
-- **FastAPI** - REST API 백엔드
-- **Langchain + FAISS** - 문서 벡터 검색
-- **OpenAI ChatGPT API** - LLM 기반 답변 생성
-- **Streamlit** - 웹 기반 챗봇 UI
-- **API 테스트 방법Docker Compose** - 배포 및 실행 환경 구성
-- **.env 환경 변수 사용** - API Key 관리
+이 프로젝트는 **Retrieval-Augmented Generation (RAG)** 기반으로 환경설정 관련 질문을 처리하는 **FastAPI + Streamlit** 챗봇입니다.  
+FastAPI 백엔드와 Streamlit 프론트엔드를 **Docker Compose**로 구성하여 실행합니다.
 
 ---
 
-## 🚀 실행 방법
+## 🚀 기술 스택
+- **Backend:** FastAPI, LangChain, OpenAI GPT-4, FAISS
+- **Frontend:** Streamlit
+- **Containerization:** Docker, Docker Compose
+- **Data Handling:** `.env` 환경변수, FAISS 벡터 DB
 
+---
+
+## 🔧 프로젝트 실행 방법
 ### 1️⃣ 환경 변수 설정
+`.env` 파일을 프로젝트 루트에 생성하고, 아래와 같이 설정합니다.
 
-`.env` 파일을 프로젝트 루트에 생성하고 아래 내용을 추가하세요:
-
-```plaintext
-OPENAI_API_KEY=your-api-key-here
+```ini
+OPENAI_API_KEY=your-openai-api-key
+API_URL=http://backend:8000
+SEARCH_API_URL=http://backend:8000/search
 ```
 
-⚠️ **중요:** `.env` 파일은 `Docker Hub`에 업로드되지 않도록 `.gitignore`에서 제외 처리해야 합니다.
+```
+로컬 실행시 
+API_URL=http://127.0.0.1:8000
+SEARCH_API_URL=http://127.0.0.1:8000/search
 
-### 2️⃣ 필요 패키지 설치
+이런식으로 알맞게 수정해주세요
+```
+
+
+### + 로컬 FastAPI 및 Streamlit 서버 실행 (개별 실행)
 
 ```bash
-pip install -r requirements.txt
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload 
+
+streamlit run streamlit_app.py --server.port 8501 
 ```
-
-### 3️⃣ FastAPI 및 Streamlit 서버 실행 (개별 실행)
-
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-streamlit run streamlit_app.py --server.port 8501 --server.address 0.0.0.0
-```
-
-
-
-### 4️⃣ Streamlit UI 실행
-
-```bash
-streamlit run streamlit_app.py
-```
-
-### 5️⃣ API 테스트 방법
-
-```bash
-# 문서 검색 API 테스트
-curl -X GET "http://localhost:8000/search/?query=Python 설치"
-
-# 챗봇 API 테스트 (리눅스/macOS)
-curl -X POST "http://localhost:8000/chat/" -H "Content-Type: application/json" -d '{"query": "Python 환경 설정 방법"}'
-
-# 챗봇 API 테스트 (Windows PowerShell)
-Invoke-RestMethod -Uri "http://localhost:8000/chat/" -Method Post -Headers @{"Content-Type"="application/json"} -Body '{"query": "Python 환경 설정 방법"}'
-```
----
-
-
-## 🖥 Streamlit UI 화면 구성
-
-- **질문 입력 필드**: 사용자가 환경 설정 관련 질문을 입력하는 곳입니다.
-- **질문하기 버튼**: 입력된 질문을 FastAPI 서버에 전송하여 답변을 받습니다.
-- **답변 출력 영역**: OpenAI API를 통해 생성된 답변이 표시됩니다.
-- **참고 문서 표시**: 검색된 관련 문서의 출처를 보여줍니다.
-- **검색 기능**: 특정 키워드에 대한 관련 문서를 찾을 수 있습니다.
-- **검색 결과 출력**: 검색된 문서 내용을 확인할 수 있습니다.
 
 ---
 
-## 🐳 Docker Compose 실행 방법
-
-Docker 환경에서 FastAPI 및 Streamlit을 실행하려면 아래 명령어를 사용하세요.
-
+### 2️⃣ Docker Compose로 프로젝트 실행
+FastAPI 백엔드와 Streamlit 프론트엔드를 함께 실행하려면 다음 명령어를 사용하세요.
 ```bash
-docker-compose up --build
+docker compose up -d  # 백그라운드 모드로 실행
+```
+실행 후:
+- FastAPI 백엔드: [http://127.0.0.1:18001/docs](http://127.0.0.1:18001/docs)
+- Streamlit 프론트엔드: [http://127.0.0.1:18502](http://127.0.0.1:18502)
+
+컨테이너를 중지하려면:
+```bash
+docker compose down
 ```
 
-서버가 정상적으로 실행되면 아래 URL에서 FastAPI 및 Streamlit을 확인할 수 있습니다:
 
-- API 문서: [http://localhost:8000/docs](http://localhost:8000/docs)
-- 문서 검색 API: `http://localhost:8000/search/?query=YOUR_QUERY`
-- 챗봇 API: `http://localhost:8000/chat/?query=YOUR_QUERY`
-
-Streamlit UI는 `http://localhost:8501`에서 실행됩니다.
-
-⚠️ **Docker Hub에 올릴 경우 .env 파일을 올리지 않도록 주의하세요!**
 
 ---
 
-## 🛠 주요 기능
-
-- 📄 **문서 기반 검색**: FAISS 벡터 DB를 활용한 관련 문서 검색
-- 🤖 **LLM 기반 응답 생성**: OpenAI ChatGPT API와 Langchain을 활용한 대화 생성
-- 🏗 **FastAPI 서버**: REST API 기반으로 확장 가능
-- 🖥 **Streamlit UI 지원**: 웹 기반 챗봇 인터페이스 제공
-- 🐳 **Docker 지원**: 컨테이너 기반으로 배포 가능
+## 🛠 구성 파일 네트워크 부분 수정 설명
+### 📌 `docker-compose.yml`
+```yaml
+services:
+  backend:
+    build: .
+    ports:
+      - "18001:8000"
+    env_file:
+      - .env
+    networks:
+      - rag_network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
+  frontend:
+    build: .
+    ports:
+      - "18502:8501"
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    networks:
+      - rag_network
+    command: streamlit run streamlit_app.py
+networks:
+  rag_network:
+    name: rag_network
+    driver: bridge
+```
+➡ **FastAPI와 Streamlit이 동일한 네트워크(`rag_network`)에서 통신하도록 설정됨.**
 
 ---
 
+## 📌 주요 기능
+### ✅ FastAPI 백엔드 (`main.py`)
+- **RAG 기반 질문 응답 (`/chat/`)**
+  - LangChain과 OpenAI GPT-4를 활용한 질문 응답 API 제공
+- **문서 검색 기능 (`/search/`)**
+  - FAISS 벡터 DB 기반 유사 문서 검색
+
+### ✅ Streamlit 프론트엔드 (`streamlit_app.py`)
+- **환경설정 관련 질문을 입력하면 즉시 응답**
+- **검색 결과를 `expander()` UI로 깔끔하게 표시**
+- **하늘색 테마 & 버튼 스타일링 적용**
+
 ---
+
+## 🚨 트러블슈팅 & 해결 방법
+| 문제 | 해결 방법 |
+|------|----------|
+| `/docs`(Swagger UI) 페이지가 정상적으로 뜨지 않음 | CORS 부분 코드 삭제  |
+| `Missing some input keys: {'query'}` 오류 | `qa_chain.invoke({"query": query_request.query})` 수정 |
+| FastAPI 로그가 버퍼링되어 `print()` 출력이 늦게 보임 | Dockerfile에 `ENV PYTHONUNBUFFERED=1` 추가 |
+| Docker 빌드 속도가 느림 | `base.Dockerfile`을 활용하여 의존성 캐싱 (`FROM myapp-base`) |
+| Streamlit UI 버튼 호버 시 글자색 변경 | `color: white !important;` 스타일 적용 |
+| Docker Compose에서 컨테이너 간 통신이 되지 않음| docker-compose.yml에 networks 설정 추가 (driver: bridge) |
+---
+
 ## 화면 예시 
 
-![질문](image1.png)
-![대답](image2.png)
-![추가사항항](image3.png)
+![질문 및 대답](ver0.2_image1.png)
+![문서 검색 및 접힌 대답](ver0.2_image2.png)
+![펼친 대답](ver0.2_image3.png)
 ---
 
-## 📌 추가 사항
-
-- **테스트 코드 작성**: `pytest` 기반 API 테스트 추가 예정
-- **Streamlit UI 개선**: 사용자 경험 향상을 위한 UI 개선 예정
-- **API 최적화**: Langchain을 통한 토큰 최적화 및 성능 개선 계획
+## 📌 추가 참고 사항
+- FastAPI + LangChain 조합을 활용한 **RAG(ChatGPT + 벡터 검색)**
+- Docker Compose 기반 **FastAPI & Streamlit 배포 자동화**
+- Streamlit UI 커스터마이징 (하늘색 테마, 버튼 스타일)
 
 ---
 
-## 📢 문의 및 개선
-
-이 프로젝트에 기여하거나 문의사항이 있으면 GitHub Issue를 생성해주세요! 😊
+## 📞 문의 및 피드백
+개선할 사항이나 문의가 있다면 언제든지 PR 또는 이슈를 등록해주세요! 🚀🔥
 
