@@ -130,6 +130,31 @@ networks:
 - Docker Compose 기반 **FastAPI & Streamlit 배포 자동화**
 - Streamlit UI 커스터마이징 (하늘색 테마, 버튼 스타일)
 
+### 디렉토리 구조조
+```bash
+📂 프로젝트 루트
+├── 📂 data
+│   ├── 📂 faiss_index
+│   ├── 📂 guide
+│   │   ├── k8s_setup_guide.md
+│   │   ├── setup_guide.md
+├── .dockerignore
+├── .env
+├── .gitignore
+├── base.Dockerfile
+├── docker-compose.yml
+├── Dockerfile
+├── main.py
+├── README.md
+├── requirements.txt
+├── streamlit_app.py
+├── ver0.2_image1.png
+├── ver0.2_image2.png
+├── ver0.2_image3.png
+
+
+```
+
 ---
 
 ## 📞 문의 및 피드백
